@@ -37,7 +37,8 @@ const Dashboard = ()=>{
 
 
     useEffect(()=>{
-        fetchEvents();
+        if(user)
+            fetchEvents();
     },[user]);
 
 
