@@ -8,16 +8,17 @@ const Dashboard = () => {
     const [events, setEvents] = useState([]);
     const navigate = useNavigate();
 
-    const fetchEvents = () => {
+    const fetchEvents = async () => {
         if (!user) return;
 
-        axios.get("https://event-manager-backend-3l2j.onrender.com/api/events/dashboard", 
-            { headers: { "Auth": `${user.id}` } }
-        ).then((res) => {
+        try {
+            const res = await axios.get("https://event-manager-backend-3l2j.onrender.com/api/events/dashboard", {
+                headers: { "Auth": `${user.id}` }
+            });
             setEvents(res.data);
-        }).catch(() => {
-            console.log("Error fetching events");
-        });
+        } catch (error) {
+            console.log("Error fetching events:", error);
+        }
     };
 
     useEffect(() => {
@@ -26,18 +27,23 @@ const Dashboard = () => {
             navigate("/login");
             return;
         }
-        const decoded = jwtDecode(token);
-        setUser(decoded);
+        try {
+            const decoded = jwtDecode(token);
+            setUser(decoded);
+        } catch (error) {
+            console.log("Invalid token:", error);
+            navigate("/login");
+        }
     }, [navigate]);
 
     useEffect(() => {
-        fetchEvents();
+        if (user) fetchEvents();
     }, [user]);
 
     useEffect(() => {
-        const interval = setInterval(fetchEvents, 3000); 
-        return () => clearInterval(interval); 
-    }, []);
+        const interval = setInterval(fetchEvents, 2000);
+        return () => clearInterval(interval);
+    }, [user]);
 
     return user ? (
         <div className="container mt-4">
